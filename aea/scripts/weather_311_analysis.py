@@ -4,7 +4,7 @@ Discovers hidden relationships between Calgary weather conditions,
 311 service request types, and communities.
 
 Weather source : Open-Meteo historical archive API (free, no API key).
-Output         : aea/reports/weather_311_analysis.html  (self-contained)
+Output         : docs/weather_311_analysis.html  (self-contained)
 
 Dependencies: pandas, matplotlib, numpy, requests
 """
@@ -25,7 +25,7 @@ CALGARY_LAT   = 51.0447
 CALGARY_LON   = -114.0719
 WEATHER_CACHE = Path("aea/output/weather_calgary_daily.csv")
 CSV_PATH      = "dataset/311_Service_Requests_20260329.csv"
-DEFAULT_OUT   = "aea/reports/weather_311_analysis.html"
+DEFAULT_OUT   = "docs/weather_311_analysis.html"
 
 WEATHER_VARS = [
     "temperature_2m_max",

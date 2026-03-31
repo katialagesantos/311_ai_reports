@@ -19,7 +19,7 @@ DEFAULT_POINTS_PER_YEAR = 3_000
 def parse_args():
     p = argparse.ArgumentParser(description="Generate a filterable interactive 311 map of Calgary.")
     p.add_argument("--input",  default=CSV_PATH)
-    p.add_argument("--output", default="aea/reports/community_map.html")
+    p.add_argument("--output", default="docs/community_map.html")
     p.add_argument("--nrows",  type=int, default=None)
     p.add_argument("--points-per-year", type=int, default=DEFAULT_POINTS_PER_YEAR,
         help=f"Max sampled points per year (default: {DEFAULT_POINTS_PER_YEAR:,}).")

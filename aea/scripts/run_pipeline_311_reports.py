@@ -47,12 +47,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--dashboard-html",
-        default="aea/reports/summary_dashboard.html",
+        default="docs/summary_dashboard.html",
         help="Output path for dashboard HTML file.",
     )
     parser.add_argument(
         "--map-output",
-        default="aea/reports/community_map.html",
+        default="docs/community_map.html",
         help="Output path for the community map HTML file.",
     )
     parser.add_argument(
@@ -144,7 +144,7 @@ def main() -> None:
     if args.skip_profile:
         print("- Profile HTML: skipped")
     else:
-        print("- Profile HTML: aea/reports/report.html")
+        print("- Profile HTML: docs/report.html")
     print(f"- Analysis JSON: {args.analysis_json}")
     print(f"- Charts folder: {args.charts_output_dir}")
     print(f"- Dashboard HTML: {args.dashboard_html}")

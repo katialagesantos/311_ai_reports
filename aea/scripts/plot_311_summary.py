@@ -37,7 +37,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--html-output",
-        default="aea/reports/summary_dashboard.html",
+        default="docs/summary_dashboard.html",
         help="Output path for dashboard HTML file (default: eda/reports/summary_dashboard.html).",
     )
     return parser.parse_args()

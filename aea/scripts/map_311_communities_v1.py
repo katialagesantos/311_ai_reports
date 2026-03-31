@@ -23,8 +23,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output",
-        default="aea/reports/community_map.html",
-        help="Output path for the HTML map (default: aea/reports/community_map.html).",
+        default="docs/community_map.html",
+        help="Output path for the HTML map (default: docs/community_map.html).",
     )
     parser.add_argument(
         "--nrows",
