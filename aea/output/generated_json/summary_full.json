@@ -1,0 +1,133 @@
+{
+  "input_file": "dataset/311_Service_Requests_20260329.csv",
+  "shape": {
+    "rows": 7217235,
+    "columns": 15
+  },
+  "columns": [
+    "service_request_id",
+    "requested_date",
+    "updated_date",
+    "closed_date",
+    "status_description",
+    "source",
+    "service_name",
+    "agency_responsible",
+    "address",
+    "comm_code",
+    "comm_name",
+    "location_type",
+    "longitude",
+    "latitude",
+    "point"
+  ],
+  "duplicate_rows": 0,
+  "top_missing_pct": {
+    "address": 100.0,
+    "longitude": 5.76,
+    "latitude": 5.76,
+    "point": 5.76,
+    "comm_code": 5.76,
+    "comm_name": 5.76,
+    "location_type": 5.75,
+    "updated_date": 1.08,
+    "closed_date": 0.91,
+    "service_name": 0.12
+  },
+  "categorical_top_values": {
+    "status_description": {
+      "Closed": 7036011,
+      "Duplicate (Closed)": 111443,
+      "Open": 67689,
+      "Duplicate (Open)": 1989,
+      "TO BE DELETED": 103
+    },
+    "service_name": {
+      "WRS - Cart Management": 243452,
+      "Finance - Property Tax Account Inquiry": 198712,
+      "Finance - TIPP Agreement Request": 196962,
+      "CBS Inspection - Electrical": 176002,
+      "WRS - Waste - Residential": 163446,
+      "Bylaw - Snow and Ice on Sidewalk": 159846,
+      "Roads - Snow and Ice Control": 155126,
+      "Finance - ONLINE TIPP Agreement Request": 134822,
+      "Corporate - Graffiti Concerns": 134598,
+      "CBS Inspection - Residential Improvement Project - RIP": 124284
+    },
+    "agency_responsible": {
+      "CS - Calgary Community Standards": 1027894,
+      "TRAN - Roads": 946027,
+      "PD - Calgary Building Services": 864111,
+      "CFOD - Finance": 605890,
+      "UEP - Waste and Recycling Services": 598086,
+      "UEP - Water Services": 432975,
+      "CS - Calgary Parks": 369223,
+      "CS - Emergency Management and Community Safety": 299084,
+      "OS - Mobility": 294242,
+      "OS - Waste and Recycling Services": 229771
+    },
+    "source": {
+      "Phone": 4009291,
+      "Other": 1910545,
+      "App": 725088,
+      "Web": 572311
+    },
+    "location_type": {
+      "Community Centrepoint": 6802196,
+      "MISSING": 415039
+    },
+    "comm_name": {
+      "MISSING": 415816,
+      "DOWNTOWN COMMERCIAL CORE": 149544,
+      "BELTLINE": 133351,
+      "BOWNESS": 85648,
+      "CRANSTON": 75998,
+      "SADDLE RIDGE": 75856,
+      "MCKENZIE TOWNE": 67646,
+      "EVANSTON": 67361,
+      "HUNTINGTON HILLS": 66986,
+      "VARSITY": 65755
+    }
+  },
+  "date_summary": {
+    "requested_date": {
+      "missing_pct": 0.0,
+      "min": "2010-01-25 00:00:00",
+      "max": "2026-03-27 00:00:00"
+    },
+    "updated_date": {
+      "missing_pct": 1.08,
+      "min": "2012-01-01 02:11:34",
+      "max": "2026-03-27 00:00:00"
+    },
+    "closed_date": {
+      "missing_pct": 0.91,
+      "min": "2010-02-17 00:00:00",
+      "max": "2026-03-27 00:00:00"
+    }
+  },
+  "resolution_days": {
+    "count": 7150550.0,
+    "mean": 19.0,
+    "std": 106.27,
+    "min": 0.0,
+    "50%": 2.0,
+    "75%": 7.0,
+    "90%": 24.0,
+    "95%": 54.0,
+    "99%": 368.0,
+    "max": 5355.0
+  },
+  "top_request_months": {
+    "2014-01": 67078,
+    "2023-06": 65339,
+    "2022-06": 60469,
+    "2017-06": 58936,
+    "2020-06": 58858,
+    "2016-06": 57048,
+    "2018-06": 56596,
+    "2015-06": 56451,
+    "2018-03": 56411,
+    "2019-06": 56040
+  }
+}

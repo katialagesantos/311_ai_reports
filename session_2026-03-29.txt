@@ -1,0 +1,243 @@
+================================================================================
+SESSION NOTES — 2026-03-29
+Project: Calgary 311 AI Analysis
+Path: /Users/danielhayesmusic/Documents/katia/311/ai
+================================================================================
+
+
+--------------------------------------------------------------------------------
+DATASET
+--------------------------------------------------------------------------------
+File    : dataset/311_Service_Requests_20260329.csv
+Rows    : 7,217,235
+Columns : service_request_id, requested_date, updated_date, closed_date,
+          status_description, source, service_name, agency_responsible,
+          address, comm_code, comm_name, location_type, longitude, latitude, point
+
+Date range : 2010-01-25 → 2026-03-27
+Valid coords + year : 6,801,328 rows
+
+Column descriptions (provided by user):
+  service_request_id  — unique identifier for each request
+  requested_date      — date the request was submitted
+  updated_date        — most recent update date
+  closed_date         — date request was closed
+  status_description  — current status (e.g. open, closed)
+  source              — channel used to submit (phone, app, web, etc.)
+  service_name        — type of service requested
+  agency_responsible  — department responsible
+  address             — location of the request (if applicable)
+  comm_code           — community code
+  comm_name           — community name
+  location_type       — None | Community Centrepoint | Service Request Location
+  longitude           — WGS84 longitude
+  latitude            — WGS84 latitude
+  point               — spatial coords from lat/lon
+
+
+--------------------------------------------------------------------------------
+PROJECT STRUCTURE
+--------------------------------------------------------------------------------
+aea/
+  scripts/
+    datasetProfile.py           — ydata-profiling HTML report
+    analyze_311_summary.py      — numeric summary, outputs JSON
+    plot_311_summary.py         — 4 PNG charts + self-contained HTML dashboard
+    run_all_311_reports.py      — pipeline orchestrator (profile → analysis → charts → map)
+    map_311_communities.py      — OLD folium-based map (204 lines, heavy, being replaced)
+    map_311_communities_v2.py   — NEW Leaflet.js map with year-range filter UI
+    weather_311_analysis.py     — weather × 311 relationship analysis (created today)
+  output/
+    generated_json/             — JSON outputs from analyze script
+    weather_calgary_daily.csv   — cached Open-Meteo weather data (5,863 days)
+  reports/
+    community_map.html          — output of map_311_communities_v2.py (2.9 MB)
+    weather_311_analysis.html   — output of weather_311_analysis.py (0.6 MB)
+dataset/
+  311_Service_Requests_20260329.csv
+venv/                           — Python virtual environment
+requirements.txt                — pandas, matplotlib, folium, ydata-profiling, numpy, requests
+
+
+--------------------------------------------------------------------------------
+TOPIC 1 — INTERACTIVE MAP (map_311_communities_v2.py)
+--------------------------------------------------------------------------------
+
+PROBLEM WITH OLD VERSION:
+  - Used folium library (Python wrapper around Leaflet)
+  - Embedded 90k–280k raw points as GeoJSON → crashed browsers
+  - No filtering — rendered all points at once
+
+NEW APPROACH (map_311_communities_v2.py):
+  - Pure Leaflet.js via CDN (no folium)
+  - Samples max 3,000 points per year (DEFAULT_POINTS_PER_YEAR = 3_000)
+  - Data embedded as JSON object DATA_BY_YEAR in the HTML
+  - Year-range picker (From / To dropdowns) + mode radios (Heatmap / Cluster / Both)
+  - "Generate Map" button renders only selected years client-side
+  - No server needed — single self-contained HTML file
+
+HOW SAMPLING WORKS:
+  chunk = df[df["year"] == year]
+  if len(chunk) > points_per_year:
+      chunk = chunk.sample(points_per_year, random_state=42)
+  - random_state=42 makes the sample reproducible (same rows every run)
+  - Uniform random — no stratification by service type or community
+
+YEAR STATS (full dataset):
+  - 2 years under 3,000 points: 2010 (31), 2011 (75)
+  - 15 years over 3,000 — averaging ~450,000–525,000 points each
+  - 3,000 cap = ~0.6% of each year's data
+
+WHY NOT ALL POINTS:
+  - 5–7 years × 400k avg = 2–2.8M points
+  - Embedded JSON would be 110–154 MB
+  - Browser would freeze or crash
+  - 3k/year is sufficient for visual pattern recognition
+
+RUN COMMAND:
+  venv/bin/python aea/scripts/map_311_communities_v2.py
+  Options: --nrows, --output, --points-per-year
+
+OUTPUT: aea/reports/community_map.html (2.9 MB for full dataset)
+
+
+--------------------------------------------------------------------------------
+TOPIC 2 — WEATHER × 311 ANALYSIS (weather_311_analysis.py)
+--------------------------------------------------------------------------------
+
+PURPOSE:
+  Discover hidden relationships between Calgary weather conditions,
+  311 complaint types, and communities.
+
+WEATHER DATA SOURCE:
+  Open-Meteo Historical Archive API — free, no API key required
+  URL: https://archive-api.open-meteo.com/v1/archive
+  Parameters: latitude, longitude, start_date, end_date, daily vars
+  Cache: saved to aea/output/weather_calgary_daily.csv after first fetch
+
+WEATHER VARIABLES FETCHED (daily):
+  temperature_2m_max    — max temperature (°C)
+  temperature_2m_min    — min temperature (°C)
+  precipitation_sum     — total precipitation (mm)
+  snowfall_sum          — snowfall (cm)
+  wind_speed_10m_max    — max wind speed (km/h)
+
+WEATHER CATEGORIES (CAT_RULES, priority order — first match wins):
+  Extreme Cold  : max_temp < -15°C      (EC advisory threshold ~-15 to -20°C)
+  Heavy Snow    : snowfall >= 10 cm     (EC snowfall warning = 10 cm/24h)
+  Heavy Rain    : precipitation >= 20mm (EC rainfall warning ~25-50mm; 20mm conservative)
+  Windy         : wind >= 55 km/h       (EC wind warning = 70km/h; 55 used for near-threshold)
+  Hot           : max_temp >= 28°C      (Calgary avg summer high ~23°C; 28 is notably above)
+  Cold          : max_temp < 0°C        (below freezing)
+  Snow          : snowfall >= 2 cm      (light measurable accumulation)
+  Rain          : precipitation >= 5mm  (light meaningful rain)
+  Cool          : max_temp < 15°C       (below comfortable outdoor temp)
+  Warm/Normal   : everything else (default)
+
+NOTE: Thresholds are based on general meteorological conventions and Calgary's
+climate — not pulled from an official standard. Can be adjusted in CAT_RULES.
+
+HOW assign_weather_category() WORKS:
+  1. Every day starts as "Warm/Normal"
+  2. CAT_RULES is iterated in REVERSE (lowest priority first)
+  3. Each rule is a lambda returning a boolean mask for all rows
+  4. Higher-priority rules overwrite lower ones → final = most severe condition
+  5. Each day gets exactly ONE primary weather category
+
+HOW THE DATA MERGE WORKS:
+  merged = requests_df.merge(weather_df, on="date", how="inner")
+  - Inner join: only keeps rows where date exists in BOTH datasets
+  - 7,217,235 loaded → 7,192,827 merged (24,408 dropped)
+  - Dropped rows = dates outside the weather cache coverage window
+  - FIX: run with --no-cache to re-fetch weather for the full date range
+
+HOW fig_to_b64() WORKS:
+  - Saves each matplotlib chart to an in-memory buffer (not disk)
+  - Encodes as Base64 text
+  - Embedded in HTML as data:image/png;base64,...
+  - Makes the report a single self-contained file
+
+THE 6 ANALYSES:
+
+  1. CORRELATION HEATMAP (plot_correlation_heatmap)
+     - Aggregates daily request counts per service type
+     - Computes Spearman correlation with each weather variable
+     - Spearman used (not Pearson) because data is not normally distributed
+     - Result: matrix of services × weather variables (-1 to +1)
+     - Sorted by highest absolute correlation
+
+  2. SEASONAL HEATMAP (plot_seasonal_heatmap)
+     - Groups requests by service × month
+     - Row-normalised: each cell = share of that service's annual requests
+     - Services sorted by peak month → reveals seasonal clusters visually
+
+  3. WEATHER CATEGORY BREAKDOWN (plot_weather_category_breakdown)
+     - Average daily requests per service per weather category
+     - Normalised by number of days in each category (prevents "Warm/Normal" 
+       dominating just because it has the most days)
+
+  4. COMMUNITY EXTREME WEATHER (plot_community_extreme_weather)
+     - Filters to Extreme Cold / Heavy Snow / Heavy Rain / Windy days only
+     - Shows top 15 communities by total request volume
+     - Stacked horizontal bars: breakdown by weather type
+
+  5. MONTHLY VOLUME vs TEMPERATURE (plot_monthly_volume_temp)
+     - Dual-axis chart from 2010 to 2026
+     - Blue bars = monthly 311 request count
+     - Red line = average daily max temperature
+     - twinx() creates second y-axis sharing the same x-axis
+
+  6. SPIKE TABLES (get_spike_results)
+     - Baseline: average daily requests per service on "Warm/Normal" days
+     - For each extreme category: average daily requests on those days
+     - Ratio = extreme_daily / normal_daily
+     - 3.0× means 3× more requests per day than normal
+     - Only top 100 services by volume included (filters noise)
+
+RUN COMMAND:
+  venv/bin/python aea/scripts/weather_311_analysis.py
+  Options: --nrows, --output, --top-services, --no-cache
+
+OUTPUT: aea/reports/weather_311_analysis.html (0.6 MB for full dataset)
+
+KNOWN ISSUE:
+  Weather cache was built from a 500k-row test (range 2010-02-16 → 2026-03-06)
+  Full dataset range is 2010-01-25 → 2026-03-27 → 24,408 requests missing
+  FIX: venv/bin/python aea/scripts/weather_311_analysis.py --no-cache
+
+
+--------------------------------------------------------------------------------
+PIPELINE (run_all_311_reports.py)
+--------------------------------------------------------------------------------
+Steps:
+  1. datasetProfile.py        — ydata-profiling report
+  2. analyze_311_summary.py   — numeric JSON summary
+  3. plot_311_summary.py      — charts + HTML dashboard
+  4. map_311_communities.py   — interactive map (currently OLD version)
+
+Note: map_311_communities_v2.py is the replacement but has not yet been
+swapped in. map_311_communities_v2.py is also NOT yet integrated into the
+pipeline. weather_311_analysis.py is also standalone (not in pipeline yet).
+
+Pipeline run command:
+  venv/bin/python aea/scripts/run_all_311_reports.py --top-n 10
+  Options: --nrows, --skip-profile, --skip-map, --map-output, --map-mode
+
+
+--------------------------------------------------------------------------------
+PENDING ITEMS / KNOWN STATE
+--------------------------------------------------------------------------------
+- map_311_communities.py (old) still on disk — v2 not yet swapped in
+- weather_311_analysis.py not yet added to pipeline
+- Weather cache covers partial date range → run --no-cache for full coverage
+- The --mode CLI arg in run_all_311_reports.py passes --mode to the map script;
+  v2 script does NOT have --mode (mode is chosen in browser) — needs cleanup
+
+
+--------------------------------------------------------------------------------
+PYTHON ENVIRONMENT
+--------------------------------------------------------------------------------
+Python 3.11, venv at venv/
+Run scripts with: venv/bin/python
+Key packages: pandas, matplotlib, numpy, requests, folium, ydata-profiling
+================================================================================

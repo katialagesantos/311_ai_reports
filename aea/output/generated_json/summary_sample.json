@@ -1,0 +1,108 @@
+{
+  "input_file": "dataset/311_Service_Requests_20260329.csv",
+  "shape": {
+    "rows": 200000,
+    "columns": 15
+  },
+  "columns": [
+    "service_request_id",
+    "requested_date",
+    "updated_date",
+    "closed_date",
+    "status_description",
+    "source",
+    "service_name",
+    "agency_responsible",
+    "address",
+    "comm_code",
+    "comm_name",
+    "location_type",
+    "longitude",
+    "latitude",
+    "point"
+  ],
+  "duplicate_rows": 0,
+  "top_missing_pct": {
+    "address": 100.0,
+    "longitude": 6.07,
+    "latitude": 6.07,
+    "point": 6.07,
+    "comm_code": 6.07
+  },
+  "categorical_top_values": {
+    "status_description": {
+      "Closed": 197129,
+      "Open": 1492,
+      "Duplicate (Closed)": 1348,
+      "Duplicate (Open)": 29,
+      "TO BE DELETED": 2
+    },
+    "service_name": {
+      "Finance - Property Tax Account Inquiry": 9033,
+      "WRS - Cart Management": 8369,
+      "Finance - ONLINE TIPP Agreement Request": 5755,
+      "CBS Inspection - Electrical": 5732,
+      "Parks - Tree Concern - WAM": 4804
+    },
+    "agency_responsible": {
+      "TRAN - Roads": 29785,
+      "CS - Calgary Community Standards": 29016,
+      "PD - Calgary Building Services": 28234,
+      "UEP - Waste and Recycling Services": 22538,
+      "CFOD - Finance": 18853
+    },
+    "source": {
+      "Phone": 112330,
+      "Other": 43610,
+      "App": 22293,
+      "Web": 21767
+    },
+    "location_type": {
+      "Community Centrepoint": 187898,
+      "MISSING": 12102
+    },
+    "comm_name": {
+      "MISSING": 12131,
+      "DOWNTOWN COMMERCIAL CORE": 3582,
+      "BELTLINE": 3436,
+      "SADDLE RIDGE": 2508,
+      "BOWNESS": 2205
+    }
+  },
+  "date_summary": {
+    "requested_date": {
+      "missing_pct": 0.0,
+      "min": "2010-06-11 06:32:16",
+      "max": "2026-03-06 00:00:00"
+    },
+    "updated_date": {
+      "missing_pct": 0.35,
+      "min": "2012-07-11 17:00:01",
+      "max": "2026-03-26 00:00:00"
+    },
+    "closed_date": {
+      "missing_pct": 0.74,
+      "min": "2012-07-11 17:00:01",
+      "max": "2026-03-26 00:00:00"
+    }
+  },
+  "resolution_days": {
+    "count": 198435.0,
+    "mean": 22.77,
+    "std": 104.6,
+    "min": 0.0,
+    "50%": 2.0,
+    "75%": 7.0,
+    "90%": 29.0,
+    "95%": 72.89,
+    "99%": 510.0,
+    "max": 3384.23
+  },
+  "top_request_months": {
+    "2019-09": 19075,
+    "2019-11": 15858,
+    "2020-05": 14183,
+    "2012-07": 13466,
+    "2020-06": 12739
+  }
+}

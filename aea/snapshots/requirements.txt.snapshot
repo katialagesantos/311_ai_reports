@@ -1,0 +1,4 @@
+pandas
+ydata-profiling
+setuptools<81
+matplotlib

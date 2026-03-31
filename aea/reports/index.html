@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calgary 311 – Reports</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f9;
+    color: #222;
+    min-height: 100vh;
+  }
+  header {
+    background: #1e2a38;
+    color: white;
+    padding: 32px 40px;
+  }
+  header h1 { font-size: 26px; margin-bottom: 6px; }
+  header p  { color: #8ab; font-size: 14px; }
+
+  main {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 24px;
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #888;
+    margin: 36px 0 14px;
+    border-bottom: 1px solid #dde;
+    padding-bottom: 6px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px 22px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 0.15s, transform 0.15s;
+    border-left: 4px solid #2980b9;
+  }
+  .card:hover {
+    box-shadow: 0 4px 14px rgba(0,0,0,.13);
+    transform: translateY(-2px);
+  }
+  .card.green  { border-left-color: #27ae60; }
+  .card.purple { border-left-color: #8e44ad; }
+  .card.orange { border-left-color: #e67e22; }
+
+  .card-icon { font-size: 26px; }
+  .card-title {
+    font-size: 15px;
+    font-weight: bold;
+    color: #2c3e50;
+  }
+  .card-desc {
+    font-size: 12px;
+    color: #777;
+    line-height: 1.5;
+  }
+  .card-tag {
+    display: inline-block;
+    background: #eef3f8;
+    color: #2980b9;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-top: 4px;
+    align-self: flex-start;
+  }
+
+  footer {
+    text-align: center;
+    padding: 32px;
+    color: #aaa;
+    font-size: 12px;
+    margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>&#128202; Calgary 311 – Reports Dashboard</h1>
+  <p>Analysis reports generated from City of Calgary 311 Open Data (2010 – 2026)</p>
+</header>
+
+<main>
+
+  <div class="section-title">Maps</div>
+  <div class="card-grid">
+    <a class="card green" href="community_map.html" target="_blank">
+      <div class="card-icon">&#128506;</div>
+      <div class="card-title">Community Map</div>
+      <div class="card-desc">
+        Interactive Leaflet map of 311 requests by location.
+        Filter by year range and toggle between heatmap and cluster view.
+      </div>
+      <span class="card-tag">Interactive · Leaflet.js</span>
+    </a>
+  </div>
+
+  <div class="section-title">Analysis Reports</div>
+  <div class="card-grid">
+    <a class="card purple" href="weather_311_analysis.html" target="_blank">
+      <div class="card-icon">&#127774;</div>
+      <div class="card-title">Weather × 311 Analysis</div>
+      <div class="card-desc">
+        Hidden relationships between Calgary weather conditions,
+        service request types, and communities. Includes correlation heatmaps,
+        seasonal patterns, and spike analysis during extreme events.
+      </div>
+      <span class="card-tag">7.2M requests · 5,863 weather days</span>
+    </a>
+
+    <a class="card" href="summary_dashboard.html" target="_blank">
+      <div class="card-icon">&#128200;</div>
+      <div class="card-title">Summary Dashboard</div>
+      <div class="card-desc">
+        Top service types, agencies, communities, sources, and
+        resolution time statistics from the 311 dataset.
+      </div>
+      <span class="card-tag">Charts · HTML</span>
+    </a>
+  </div>
+
+  <div class="section-title">Profiling</div>
+  <div class="card-grid">
+    <a class="card orange" href="report.html" target="_blank">
+      <div class="card-icon">&#128203;</div>
+      <div class="card-title">Dataset Profile</div>
+      <div class="card-desc">
+        Full ydata-profiling report — column types, missing values,
+        distributions, correlations, and sample data.
+      </div>
+      <span class="card-tag">ydata-profiling</span>
+    </a>
+  </div>
+
+</main>
+
+<footer>
+  Data: City of Calgary 311 Open Data &nbsp;|&nbsp;
+  Weather: Open-Meteo Historical Archive &nbsp;|&nbsp;
+  Updated 2026-03-30
+</footer>
+
+</body>
+</html>

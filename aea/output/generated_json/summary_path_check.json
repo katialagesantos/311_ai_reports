@@ -1,0 +1,132 @@
+{
+  "input_file": "dataset/311_Service_Requests_20260329.csv",
+  "shape": {
+    "rows": 50000,
+    "columns": 15
+  },
+  "columns": [
+    "service_request_id",
+    "requested_date",
+    "updated_date",
+    "closed_date",
+    "status_description",
+    "source",
+    "service_name",
+    "agency_responsible",
+    "address",
+    "comm_code",
+    "comm_name",
+    "location_type",
+    "longitude",
+    "latitude",
+    "point"
+  ],
+  "duplicate_rows": 0,
+  "top_missing_pct": {
+    "address": 100.0,
+    "comm_code": 6.67,
+    "comm_name": 6.67,
+    "longitude": 6.67,
+    "latitude": 6.67,
+    "point": 6.67,
+    "location_type": 6.66,
+    "updated_date": 1.37,
+    "closed_date": 0.61,
+    "service_name": 0.01
+  },
+  "categorical_top_values": {
+    "status_description": {
+      "Closed": 49353,
+      "Duplicate (Closed)": 327,
+      "Open": 313,
+      "Duplicate (Open)": 7
+    },
+    "service_name": {
+      "Finance - Property Tax Account Inquiry": 1817,
+      "WRS - Cart Management": 1751,
+      "CBS Inspection - Electrical": 1497,
+      "CBS Inspection - Residential Improvement Project - RIP": 1151,
+      "Finance - ONLINE TIPP Agreement Request": 1044,
+      "WRS - Waste - Residential": 983,
+      "Finance - TIPP Agreement Request": 966,
+      "CBS Inspection - Commercial or Multi-Family": 934,
+      "Parks - Tree Concern - WAM": 839,
+      "311 Contact Us": 835
+    },
+    "agency_responsible": {
+      "CS - Calgary Community Standards": 8838,
+      "PD - Calgary Building Services": 7356,
+      "TRAN - Roads": 6898,
+      "UEP - Waste and Recycling Services": 4697,
+      "CFOD - Finance": 4340,
+      "UEP - Water Services": 3940,
+      "CS - Calgary Parks": 3618,
+      "TRAN - Calgary Transit": 1330,
+      "CS - Calgary Fire": 1194,
+      "CFOD - Customer Services and Communications": 910
+    },
+    "source": {
+      "Phone": 30156,
+      "Other": 9879,
+      "Web": 5110,
+      "App": 4855
+    },
+    "location_type": {
+      "Community Centrepoint": 46669,
+      "MISSING": 3331
+    },
+    "comm_name": {
+      "MISSING": 3337,
+      "DOWNTOWN COMMERCIAL CORE": 917,
+      "BELTLINE": 859,
+      "SADDLE RIDGE": 680,
+      "CRANSTON": 560,
+      "BOWNESS": 557,
+      "HUNTINGTON HILLS": 543,
+      "MCKENZIE TOWNE": 503,
+      "PANORAMA HILLS": 478,
+      "TUSCANY": 474
+    }
+  },
+  "date_summary": {
+    "requested_date": {
+      "missing_pct": 0.0,
+      "min": "2012-07-11 13:56:38",
+      "max": "2026-03-04 00:00:00"
+    },
+    "updated_date": {
+      "missing_pct": 1.37,
+      "min": "2012-07-11 19:16:26",
+      "max": "2026-03-06 00:00:00"
+    },
+    "closed_date": {
+      "missing_pct": 0.61,
+      "min": "2012-07-11 19:16:26",
+      "max": "2026-03-06 00:00:00"
+    }
+  },
+  "resolution_days": {
+    "count": 49692.0,
+    "mean": 16.94,
+    "std": 78.42,
+    "min": 0.0,
+    "50%": 2.0,
+    "75%": 6.0,
+    "90%": 24.97,
+    "95%": 57.0,
+    "99%": 362.0,
+    "max": 2177.92
+  },
+  "top_request_months": {
+    "2012-07": 13308,
+    "2020-06": 4464,
+    "2020-02": 3170,
+    "2020-05": 2740,
+    "2019-09": 2291,
+    "2020-11": 2246,
+    "2020-09": 1892,
+    "2021-02": 1854,
+    "2021-07": 1504,
+    "2021-11": 1392
+  }
+}
