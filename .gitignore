@@ -15,6 +15,7 @@ __pycache__/
 
 # Scratch copies
 aea/reports/community_map\ copyALL.html
+docs/community_map\ copyALL.html
 
 # Optional: exclude large profiling report if it causes issues
 # aea/reports/report.html
