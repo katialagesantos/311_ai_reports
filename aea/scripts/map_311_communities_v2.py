@@ -32,7 +32,7 @@ def load_and_aggregate(csv_path, nrows, points_per_year):
     df = pd.read_csv(csv_path, usecols=cols, low_memory=False, nrows=nrows)
     total = len(df)
     df = df.dropna(subset=["latitude", "longitude"])
-    df["year"] = pd.to_datetime(df["requested_date"], errors="coerce").dt.year
+    df["year"] = pd.to_datetime(df["requested_date"], errors="coerce", format="mixed").dt.year
     df = df.dropna(subset=["year"])
     df["year"] = df["year"].astype(int)
     kept = len(df)

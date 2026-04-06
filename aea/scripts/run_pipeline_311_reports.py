@@ -59,7 +59,7 @@ def parse_args() -> argparse.Namespace:
         "--map-mode",
         choices=["heatmap", "cluster", "both"],
         default="both",
-        help="Map mode passed to map_311_communities.py (default: both).",
+        help="Map mode passed to map_311_communities_v2.py (default: both).",
     )
     parser.add_argument(
         "--skip-profile",
@@ -69,7 +69,23 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--skip-map",
         action="store_true",
-        help="Skip map_311_communities.py.",
+        help="Skip map_311_communities_v2.py.",
+    )
+    parser.add_argument(
+        "--skip-weather",
+        action="store_true",
+        help="Skip weather_311_analysis.py.",
+    )
+    parser.add_argument(
+        "--weather-output",
+        default="docs/weather_311_analysis.html",
+        help="Output path for the weather analysis HTML file.",
+    )
+    parser.add_argument(
+        "--top-services",
+        type=int,
+        default=20,
+        help="Top N services shown in weather analysis charts (default: 20).",
     )
     return parser.parse_args()
 
@@ -110,7 +126,7 @@ def main() -> None:
 
     map_cmd = [
         python_cmd,
-        "aea/scripts/map_311_communities.py",
+        "aea/scripts/map_311_communities_v2.py",
         "--output",
         args.map_output,
         "--mode",
@@ -118,6 +134,17 @@ def main() -> None:
     ]
     if args.nrows is not None:
         map_cmd.extend(["--nrows", str(args.nrows)])
+
+    weather_cmd = [
+        python_cmd,
+        "aea/scripts/weather_311_analysis.py",
+        "--output",
+        args.weather_output,
+        "--top-services",
+        str(args.top_services),
+    ]
+    if args.nrows is not None:
+        weather_cmd.extend(["--nrows", str(args.nrows)])
 
     print("Pipeline starting from:", project_root)
     step_idx = 1
@@ -135,9 +162,16 @@ def main() -> None:
 
     if args.skip_map:
         print(f"\n=== {step_idx}) Skip community map ===")
-        print("Skipping: aea/scripts/map_311_communities.py")
+        print("Skipping: aea/scripts/map_311_communities_v2.py")
     else:
         run_step(f"{step_idx}) Generate community map", map_cmd, project_root)
+    step_idx += 1
+
+    if args.skip_weather:
+        print(f"\n=== {step_idx}) Skip weather analysis ===")
+        print("Skipping: aea/scripts/weather_311_analysis.py")
+    else:
+        run_step(f"{step_idx}) Generate weather analysis", weather_cmd, project_root)
 
     print("\nPipeline completed successfully.")
     print("Artifacts:")
@@ -152,6 +186,10 @@ def main() -> None:
         print("- Community map: skipped")
     else:
         print(f"- Community map: {args.map_output}")
+    if args.skip_weather:
+        print("- Weather analysis: skipped")
+    else:
+        print(f"- Weather analysis: {args.weather_output}")
 
 
 if __name__ == "__main__":

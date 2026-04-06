@@ -273,15 +273,11 @@ def plot_weather_category_breakdown(merged: pd.DataFrame, top_n: int) -> str:
     return fig_to_b64(fig)
 
 
-def plot_community_extreme_weather(merged: pd.DataFrame, top_n: int = 15) -> str:
-    """Top communities by request volume during extreme weather days."""
-    extreme_cats = ["Extreme Cold", "Heavy Snow", "Heavy Rain", "Windy"]
-    extreme = merged[merged["weather_cat"].isin(extreme_cats)]
-    if extreme.empty:
+def _community_extreme_chart(data: pd.DataFrame, extreme_cats: list, top_n: int, title: str) -> str:
+    if data.empty:
         return None
-
     comm_cat = (
-        extreme.groupby(["comm_name", "weather_cat"])
+        data.groupby(["comm_name", "weather_cat"])
         .size()
         .unstack(fill_value=0)
     )
@@ -292,10 +288,27 @@ def plot_community_extreme_weather(merged: pd.DataFrame, top_n: int = 15) -> str
     fig, ax = plt.subplots(figsize=(11, 6))
     top_comms[present].plot(kind="barh", stacked=True, ax=ax, colormap="Set2")
     ax.set_xlabel("Number of Requests")
-    ax.set_title(f"Top {top_n} Communities During Extreme Weather Events")
+    ax.set_title(title)
     ax.legend(loc="lower right", fontsize=9)
     fig.tight_layout()
     return fig_to_b64(fig)
+
+
+def plot_community_extreme_weather(merged: pd.DataFrame, top_n: int = 15) -> tuple:
+    """Returns two charts: one including unknown communities, one excluding them."""
+    extreme_cats = ["Extreme Cold", "Heavy Snow", "Heavy Rain", "Windy"]
+    extreme_all = merged[merged["weather_cat"].isin(extreme_cats)]
+    extreme_known = extreme_all[extreme_all["comm_name"] != "Unknown"]
+
+    chart_all   = _community_extreme_chart(
+        extreme_all, extreme_cats, top_n,
+        f"Top {top_n} Communities During Extreme Weather (all requests)"
+    )
+    chart_known = _community_extreme_chart(
+        extreme_known, extreme_cats, top_n,
+        f"Top {top_n} Communities During Extreme Weather (assigned communities only)"
+    )
+    return chart_all, chart_known
 
 
 def plot_monthly_volume_temp(merged: pd.DataFrame) -> str:
@@ -519,12 +532,23 @@ def build_report(imgs: dict, spike_results: dict, merged: pd.DataFrame) -> str:
 </div>
 
 <div class="section">
-  <h2>5. Communities Most Affected During Extreme Weather</h2>
+  <h2>5a. Communities Most Affected During Extreme Weather (all requests)</h2>
   <p class="desc">
-    Top communities by total request volume on days classified as Extreme Cold, Heavy Snow, Heavy Rain, or Windy.
+    Top communities by total request volume on extreme weather days, including requests with no assigned community (grouped as "Unknown").
     Stacked bars show which weather type drove each community's requests.
   </p>
-  {img_tag("community")}
+  {img_tag("community_all")}
+  <p style="font-size:11px;color:#999;margin-top:10px;">
+    * <strong>Unknown</strong> represents service requests where the <code>comm_name</code> field is empty (no community was recorded at time of submission).
+  </p>
+</div>
+
+<div class="section">
+  <h2>5b. Communities Most Affected During Extreme Weather (assigned communities only)</h2>
+  <p class="desc">
+    Same chart as above but excluding requests with no community assigned, showing only requests tied to a specific Calgary community.
+  </p>
+  {img_tag("community_known")}
 </div>
 
 <div class="section">
@@ -564,12 +588,14 @@ def main():
     merged = merge_data(requests_df, weather_df)
 
     print("\n[4/5] Running analyses ...")
+    community_all, community_known = plot_community_extreme_weather(merged)
     imgs = {
-        "corr":        plot_correlation_heatmap(merged, args.top_services),
-        "seasonal":    plot_seasonal_heatmap(merged, args.top_services),
-        "weather_cat": plot_weather_category_breakdown(merged, min(15, args.top_services)),
-        "community":   plot_community_extreme_weather(merged),
-        "monthly":     plot_monthly_volume_temp(merged),
+        "corr":           plot_correlation_heatmap(merged, args.top_services),
+        "seasonal":       plot_seasonal_heatmap(merged, args.top_services),
+        "weather_cat":    plot_weather_category_breakdown(merged, min(15, args.top_services)),
+        "community_all":  community_all,
+        "community_known": community_known,
+        "monthly":        plot_monthly_volume_temp(merged),
     }
     spike_results = get_spike_results(merged)
 
