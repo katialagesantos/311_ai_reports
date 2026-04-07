@@ -123,7 +123,7 @@ def assign_weather_category(df: pd.DataFrame) -> pd.DataFrame:
 
 # ── 311 data ──────────────────────────────────────────────────────────────────
 def load_311(csv_path: str, nrows) -> pd.DataFrame:
-    cols = ["requested_date", "service_name", "comm_name"]
+    cols = ["requested_date", "service_name", "comm_name", "latitude", "longitude"]
     print(f"  Loading 311 data from {csv_path} ...")
     df = pd.read_csv(csv_path, usecols=cols, low_memory=False, nrows=nrows)
     df["date"] = pd.to_datetime(df["requested_date"], errors="coerce", format="mixed")
@@ -309,6 +309,68 @@ def plot_community_extreme_weather(merged: pd.DataFrame, top_n: int = 15) -> tup
         f"Top {top_n} Communities During Extreme Weather (assigned communities only)"
     )
     return chart_all, chart_known
+
+
+def plot_community_extreme_weather_map(merged: pd.DataFrame, top_n: int = 15) -> str:
+    """Top N communities during extreme weather (same scope as 5a).
+
+    Rows that already have a comm_name keep it.  Rows where comm_name is
+    'Unknown' but have valid lat/lon are assigned the nearest known community
+    centroid (vectorised nearest-neighbour, chunked to control memory).
+    Rows with neither comm_name nor usable coordinates are dropped.
+    """
+    extreme_cats = ["Extreme Cold", "Heavy Snow", "Heavy Rain", "Windy"]
+
+    # Calgary bounding box
+    lat_min, lat_max = 50.84, 51.21
+    lon_min, lon_max = -114.32, -113.86
+
+    extreme = merged[merged["weather_cat"].isin(extreme_cats)].copy()
+    if extreme.empty:
+        return None
+
+    known_mask  = extreme["comm_name"].ne("Unknown")
+    coords_mask = (
+        extreme["latitude"].notna() &
+        extreme["longitude"].notna() &
+        extreme["latitude"].between(lat_min, lat_max) &
+        extreme["longitude"].between(lon_min, lon_max)
+    )
+
+    known   = extreme[known_mask].copy()
+    unknown = extreme[~known_mask & coords_mask].copy()
+
+    if known.empty:
+        return None
+
+    # Build community centroids from the known rows
+    centroids = (
+        known.groupby("comm_name")[["latitude", "longitude"]]
+        .mean()
+    )
+    cent_arr   = centroids.values          # shape (C, 2)
+    comm_names = centroids.index.values    # shape (C,)
+
+    # Assign nearest centroid to each unknown row (chunked to cap memory)
+    if not unknown.empty:
+        chunk_size = 10_000
+        assigned   = []
+        coords     = unknown[["latitude", "longitude"]].values
+        for start in range(0, len(coords), chunk_size):
+            chunk  = coords[start : start + chunk_size]           # (K, 2)
+            diffs  = chunk[:, np.newaxis, :] - cent_arr[np.newaxis, :, :]  # (K, C, 2)
+            dist2  = (diffs ** 2).sum(axis=2)                              # (K, C)
+            assigned.extend(comm_names[dist2.argmin(axis=1)])
+        unknown = unknown.copy()
+        unknown["comm_name"] = assigned
+
+    combined = pd.concat([known, unknown], ignore_index=True)
+
+    return _community_extreme_chart(
+        combined, extreme_cats, top_n,
+        f"Top {top_n} Communities During Extreme Weather"
+        f" (unassigned requests resolved via nearest lat/lon centroid)"
+    )
 
 
 def plot_monthly_volume_temp(merged: pd.DataFrame) -> str:
@@ -552,6 +614,16 @@ def build_report(imgs: dict, spike_results: dict, merged: pd.DataFrame) -> str:
 </div>
 
 <div class="section">
+  <h2>5c. Top 15 Communities During Extreme Weather (lat/lon resolved)</h2>
+  <p class="desc">
+    Same scope as chart 5a, but requests previously labelled "Unknown" are reassigned to their nearest known community
+    using the request's recorded latitude and longitude.
+    Requests with neither a community name nor valid coordinates are excluded.
+  </p>
+  {img_tag("community_map")}
+</div>
+
+<div class="section">
   <h2>6. Service Type Spikes During Extreme Weather</h2>
   <p class="desc">
     Ratio of average daily requests during each weather event vs Warm/Normal days.
@@ -589,12 +661,14 @@ def main():
 
     print("\n[4/5] Running analyses ...")
     community_all, community_known = plot_community_extreme_weather(merged)
+    community_map = plot_community_extreme_weather_map(merged, top_n=15)
     imgs = {
         "corr":           plot_correlation_heatmap(merged, args.top_services),
         "seasonal":       plot_seasonal_heatmap(merged, args.top_services),
         "weather_cat":    plot_weather_category_breakdown(merged, min(15, args.top_services)),
         "community_all":  community_all,
         "community_known": community_known,
+        "community_map":  community_map,
         "monthly":        plot_monthly_volume_temp(merged),
     }
     spike_results = get_spike_results(merged)
