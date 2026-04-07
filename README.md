@@ -26,6 +26,9 @@ Default CSV input:
 - aea/scripts/run_pipeline_311_reports.py
   - Runs the full pipeline in order.
 
+- aea/scripts/outlier_report.py
+  - Scans the dataset for anomalies and writes docs/outlier_report.html.
+
 ## Pipeline Command
 
 Run everything:
@@ -39,6 +42,10 @@ venv/bin/python aea/scripts/run_pipeline_311_reports.py --top-n 10
 Run everything except profile generation:
 
 venv/bin/python aea/scripts/run_pipeline_311_reports.py --skip-profile
+
+Skip slow steps (map, weather, outliers) for a fast iteration:
+
+venv/bin/python aea/scripts/run_pipeline_311_reports.py --skip-profile --skip-map --skip-weather --skip-outliers
 
 ## What --nrows Means
 
@@ -81,6 +88,33 @@ venv/bin/python aea/scripts/run_pipeline_311_reports.py --analysis-json aea/outp
 - aea/output/charts/top_services.png
 - aea/output/charts/resolution_days_distribution.png
 - aea/output/charts/open_vs_closed_by_request_month.png
+- docs/outlier_report.html
+
+## Outlier & Anomaly Report (outlier_report.py)
+
+Generates `docs/outlier_report.html` — a self-contained report with 6 automated
+quality checks on the 311 dataset.
+
+| # | Check | Method |
+|---|-------|--------|
+| 1 | **Resolution time outliers** | Flags negatives (closed < opened) and values above the 3×IQR upper fence |
+| 2 | **Monthly volume spikes/dips** | Z-score on residuals from a 12-month rolling mean; flags \|Z\| > 3 |
+| 3 | **Date anomalies** | Closed before opened, future requested/closed dates |
+| 4 | **Geographic outliers** | Coordinates outside the Calgary bounding box or near (0, 0) |
+| 5 | **Duplicate rows** | Exact row-level duplicates across all columns |
+| 6 | **Service concentration** | Monthly share per service; flags \|Z\| > 3 in any month |
+
+Run standalone:
+
+venv/bin/python aea/scripts/outlier_report.py
+
+Quick test (200k rows):
+
+venv/bin/python aea/scripts/outlier_report.py --nrows 200000
+
+Skip during pipeline run:
+
+venv/bin/python aea/scripts/run_pipeline_311_reports.py --skip-outliers
 
 ## Weather Analysis Report (weather_311_analysis.py)
 

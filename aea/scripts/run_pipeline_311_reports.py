@@ -87,6 +87,26 @@ def parse_args() -> argparse.Namespace:
         default=20,
         help="Top N services shown in weather analysis charts (default: 20).",
     )
+    parser.add_argument(
+        "--skip-outliers",
+        action="store_true",
+        help="Skip outlier_report.py.",
+    )
+    parser.add_argument(
+        "--outlier-output",
+        default="docs/outlier_report.html",
+        help="Output path for the outlier report HTML file.",
+    )
+    parser.add_argument(
+        "--skip-notes",
+        action="store_true",
+        help="Skip data_notes.py (row-exclusion summary).",
+    )
+    parser.add_argument(
+        "--notes-output",
+        default="docs/data_notes.html",
+        help="Output path for the data notes HTML file.",
+    )
     return parser.parse_args()
 
 
@@ -146,6 +166,24 @@ def main() -> None:
     if args.nrows is not None:
         weather_cmd.extend(["--nrows", str(args.nrows)])
 
+    outlier_cmd = [
+        python_cmd,
+        "aea/scripts/outlier_report.py",
+        "--output",
+        args.outlier_output,
+    ]
+    if args.nrows is not None:
+        outlier_cmd.extend(["--nrows", str(args.nrows)])
+
+    notes_cmd = [
+        python_cmd,
+        "aea/scripts/data_notes.py",
+        "--output",
+        args.notes_output,
+    ]
+    if args.nrows is not None:
+        notes_cmd.extend(["--nrows", str(args.nrows)])
+
     print("Pipeline starting from:", project_root)
     step_idx = 1
     if args.skip_profile:
@@ -172,6 +210,20 @@ def main() -> None:
         print("Skipping: aea/scripts/weather_311_analysis.py")
     else:
         run_step(f"{step_idx}) Generate weather analysis", weather_cmd, project_root)
+    step_idx += 1
+
+    if args.skip_outliers:
+        print(f"\n=== {step_idx}) Skip outlier report ===")
+        print("Skipping: aea/scripts/outlier_report.py")
+    else:
+        run_step(f"{step_idx}) Generate outlier report", outlier_cmd, project_root)
+    step_idx += 1
+
+    if args.skip_notes:
+        print(f"\n=== {step_idx}) Skip data notes ===")
+        print("Skipping: aea/scripts/data_notes.py")
+    else:
+        run_step(f"{step_idx}) Generate data notes", notes_cmd, project_root)
 
     print("\nPipeline completed successfully.")
     print("Artifacts:")
@@ -190,6 +242,14 @@ def main() -> None:
         print("- Weather analysis: skipped")
     else:
         print(f"- Weather analysis: {args.weather_output}")
+    if args.skip_outliers:
+        print("- Outlier report: skipped")
+    else:
+        print(f"- Outlier report: {args.outlier_output}")
+    if args.skip_notes:
+        print("- Data notes: skipped")
+    else:
+        print(f"- Data notes: {args.notes_output}")
 
 
 if __name__ == "__main__":
